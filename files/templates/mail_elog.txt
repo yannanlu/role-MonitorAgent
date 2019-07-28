@@ -1,0 +1,8 @@
+This message was automatically generated.
+Expected log has not shown up in log_file, ##log_file####uri##, on ##hostname##:
+
+##compact##
+
+This monitor periodically scans the new entries of the log file, ##log_file####uri## for predefined patterns.  This message shows the expected log entry has not shown up as it supposed to be.  Please contact either the oncall if you do not know how to handle it.
+
+A brief explanation on the monitor and this type of message can be found at https://intevent.cc.emory.edu/docs/application/agent.html###type##.

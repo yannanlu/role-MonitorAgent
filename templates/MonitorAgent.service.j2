@@ -1,0 +1,11 @@
+[Unit]
+Description=MonitorAgent
+After=network-online.target
+[Service]
+Type=forking
+ExecStart={{qb_dir}}/bin/agentctl start
+ExecStop={{qb_dir}}/bin/agentctl stop
+User={{qb_user}}
+Group={{qb_group}}
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+---
+- name: Empty my_files
+  set_fact:
+    my_files: []
+
+- name: Find all files matching the pattern in the folder
+  find:
+    paths: "{{qbroker_dir}}/agent"
+    pattern: '*'
+  register: f_info_agent
+  no_log: True
+
+- name: Merge the file list for the basename
+  set_fact:
+    my_files: "{{my_files}} + ['{{item.path|basename}}']"
+  with_items: "{{f_info_agent.files}}"
+  no_log: True
+
+- include: roles/qbroker/tasks/remove_item.yml
+  vars:
+    my_dir: "{{qbroker_dir}}/agent"
+  with_items: "{{my_file}}"

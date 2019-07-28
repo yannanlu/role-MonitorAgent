@@ -1,0 +1,3 @@
+---
+qbroker_security_plugin: "{{MonitorAgent_security_plugin}}"
+qbroker_logdir: "{{MonitorAgent_logdir}}"

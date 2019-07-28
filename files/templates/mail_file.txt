@@ -1,0 +1,8 @@
+This message was automatically generated.
+File of ##file####uri## has not been updated recently:
+
+##compact##
+
+This monitor periodically checks the mtime of the file, ##file####uri##, for ##description## to see if it has been updated recently.  If not, it indicates something wrong somewhere along the line.  Please login on the box and look into it.  Either contact the oncalls if you do not know how to handle it.
+
+A brief explanation on the monitor and this type of message can be found at https://intevent.cc.emory.edu/docs/application/agent.html###type##.

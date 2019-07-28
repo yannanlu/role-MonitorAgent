@@ -1,0 +1,8 @@
+This message was automatically generated.
+Problem with JMS apps on ##queue##:
+
+##compact##
+
+This monitor checks the depth of ##queue## queue and its flow rate.  The Text field tells you what problem it is.  Please contact the on call to have it fixed.
+
+A brief explanation on the monitor and this type of message can be found at https://intevent.cc.emory.edu/docs/application/agent.html###type##.

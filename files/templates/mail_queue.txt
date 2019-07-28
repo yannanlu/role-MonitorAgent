@@ -1,0 +1,9 @@
+
+This message was automatically generated.
+Problem with queue, ##queue##, on ##qmgr####uri##:
+
+##compact##
+
+This monitor checks the depth of ##queue## queue on ##qmgr####uri##.  The Text field tells you what problem it is.  Please contact the on call to have it fixed.
+
+A brief explanation on the monitor and this type of message can be found at https://intevent.cc.emory.edu/docs/application/agent.html###type##.

@@ -1,0 +1,9 @@
+
+This message was automatically generated.
+Problem with ##name##:
+
+##compact##
+
+There are ##event_count## events in this alert.  If you need more details, check individual event via another source.
+
+A brief information on the monitor and this type of message can be found at https://intevent.cc.emory.edu/docs/application/agent.html###type##.

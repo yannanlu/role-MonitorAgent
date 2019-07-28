@@ -1,0 +1,8 @@
+This message was automatically generated.
+Errors show up in the log file of ##log_file####uri## on ##hostname##:
+
+##compact##
+
+This monitor periodically scans the new entries of the log file, ##log_file####uri##, for predefined patterns.  This message shows the last log entry matching at least one of patterns (see Last Entry field).  Please contact the oncalls if you do not know how to handle it.
+
+A brief explanation on the monitor and this type of message can be found at https://intevent.cc.emory.edu/docs/application/agent.html###type##.

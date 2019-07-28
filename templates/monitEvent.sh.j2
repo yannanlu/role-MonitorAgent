@@ -1,0 +1,97 @@
+#!/bin/bash
+
+event_host={{event_host}}
+event_port={{event_port}}
+event_path=/event
+username=monit
+program=monitEvent
+name=$MONIT_SERVICE
+site=LITS
+category=MONIT
+type=MonitEvent
+priority=INFO
+extra="event ~ $MONIT_EVENT"
+COUNT=0
+
+## set parameters
+while [ "$#" -gt 0 ]
+do
+case $1 in
+'-c')
+  shift
+  category=$1
+  shift
+;;
+
+'-C')
+  shift
+  COUNT=$1
+  shift
+;;
+
+'-m')
+  shift
+  text=`echo $1 | /bin/sed 's/&/_/g'`
+  shift
+;;
+
+'-n')
+  shift
+  name=$1
+  shift
+;;
+
+'-p')
+  shift
+  priority=$1
+  shift
+;;
+
+'-s')
+  shift
+  site=$1
+  shift
+;;
+
+'-t')
+  shift
+  type=$1
+  shift
+;;
+
+'-'*)
+  a=$1
+  extra="$extra ~ ${a:1}"
+  shift
+  extra="$extra ~ $1"
+  shift
+;;
+
+*)
+  shift
+;;
+esac
+done
+
+DESC="'$MONIT_SERVICE' $MONIT_DESCRIPTION at least for $COUNT times"
+
+## send email to notify someone
+daemonNotify() { 
+    HOST=`/bin/uname -n`
+    DATE=`/bin/date +%s`
+    DATE="${DATE}000"
+    text=$DESC
+    query="SITE=$site&CATEGORY=$category&NAME=$name&date=$DATE&hostname=$HOST&program=$program&username=$username&type=$type&pid=$$&priority=$priority&summary=$text&delimiter= ~ &content=$extra"
+    length=`/usr/bin/expr "$query" : '.*'`
+    /usr/bin/nc -w 5 $event_host $event_port <<EOF
+POST $event_path HTTP/1.0
+Host: $event_host:$event_port
+User-Agent: netcat/1.0
+Content-Length: $length
+Content-Type: application/x-www-form-urlencoded
+
+$query
+EOF
+}
+
+daemonNotify

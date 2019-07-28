@@ -1,0 +1,6 @@
+---
+- name: Restart_MonitorAgent
+  systemd:
+    name: "{{role_name}}.service"
+    enabled: yes
+    state: restarted

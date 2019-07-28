@@ -1,0 +1,112 @@
+---
+- include: ../../qbroker/tasks/artifact.yml
+  vars:
+    qb_artifact: "{{MonitorAgent_artifact|default(qbroker_artifact)}}"
+
+- include: ../../qbroker/tasks/security_plugin.yml
+  when: qbroker_security_plugin != None
+
+- name: Open admin port
+  iptables:
+    chain: INPUT
+    destination_port: "{{MonitorAgent_admin_port}}"
+    action: insert
+    jump: ACCEPT
+    protocol: tcp
+    state: present
+  register: port_admin_result
+  when: MonitorAgent_admin_port > 0 and common_iptables != 'disabled'
+
+- name: Open service port
+  iptables:
+    chain: INPUT
+    destination_port: "{{MonitorAgent_service_port}}"
+    action: insert
+    jump: ACCEPT
+    protocol: tcp
+    state: present
+  register: port_service_result
+  when: MonitorAgent_service_port > 0 and common_iptables != 'disabled'
+
+- name: Save iptables
+  command: "/sbin/iptables-save"
+  when: port_service_result is changed or port_admin_result is changed
+
+- name: Template of Master.json
+  template:
+    src: Master.json.j2
+    dest: "{{qbroker_dir}}/agent/Master.json"
+    owner: "{{qbroker_user}}"
+    group: "{{qbroker_group}}"
+    mode: 0644
+  vars:
+    event_url: "{{MonitorAgent_event_url}}"
+    repo_url: "{{MonitorAgent_repo_url}}"
+    stats_url: "{{MonitorAgent_stats_url}}"
+    mail_host: "{{MonitorAgent_mail_host}}"
+    admin_port: "{{MonitorAgent_admin_port}}"
+    service_port: "{{MonitorAgent_service_port}}"
+    cfg_url: "{{MonitorAgent_cfg_url}}"
+    cfg_service: "{{MonitorAgent_cfg_service}}"
+    cfg_user: "{{MonitorAgent_cfg_user}}"
+    encrypted_passwd: "{{MonitorAgent_encrypted_passwd}}"
+    qb_dir: "{{qbroker_dir}}"
+    log_dir: "{{qbroker_logdir}}"
+  notify: "Restart_{{role_name}}"
+
+- name: Template of agentctl
+  template:
+    src: agentctl.j2
+    dest: "{{qbroker_dir}}/bin/agentctl"
+    owner: "{{qbroker_user}}"
+    group: "{{qbroker_group}}"
+    mode: 0775
+  vars:
+    qb_dir: "{{qbroker_dir}}"
+    log_dir: "{{qbroker_logdir}}"
+    qb_user: "{{qbroker_user}}"
+    java: "{{MonitorAgent_java|default(qbroker_java)}}"
+    java_opts: "{{MonitorAgent_java_opts|default(qbroker_java_opts)}}"
+    jar_files: "{{MonitorAgent_jar_files}}"
+  notify: "Restart_{{role_name}}"
+
+- name: Template of MonitorAgent.service
+  template:
+    src: "{{role_name}}.service.j2"
+    dest: "{{qbroker_systemd_dir}}/system/{{role_name}}.service"
+    mode: 0644
+  vars:
+    qb_dir: "{{qbroker_dir}}"
+    qb_user: "{{qbroker_user}}"
+    qb_group: "{{qbroker_group}}"
+  notify: "Restart_{{role_name}}"
+
+- name: Get stats of monitrc
+  stat:
+    path: "{{monit_dir}}/monitrc"
+    get_md5: no
+    get_checksum: no
+  register: st_monitrc
+
+- name: Template of MonitorAgent.monit
+  template:
+    src: "{{role_name}}.monit.j2"
+    dest: "{{monit_includedir}}/{{role_name}}.monit"
+    mode: 0644
+  vars:
+    cpu_pct: "{{MonitorAgent_cpu_pct}}"
+    mem_pct: "{{MonitorAgent_mem_pct}}"
+  when: st_monitrc.stat.exists
+  notify: Restart_monit.service
+
+- name: Template of monitEvent.sh
+  template:
+    src: monitEvent.sh.j2
+    dest: "{{qbroker_dir}}/bin/monitEvent.sh"
+    owner: "{{qbroker_user}}"
+    group: "{{qbroker_group}}"
+    mode: 0775
+  vars:
+    event_host: "{{MonitorAgent_event_url|regex_replace('^[^:]+:..([^:\\/]+).*$', '\\1')}}"
+    event_port: "{{MonitorAgent_event_url|regex_replace('^[^:]+:[^:]+:(\\d+).*$', '\\1')}}"
+  when: st_monitrc.stat.exists

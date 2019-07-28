@@ -1,0 +1,492 @@
+{
+  "Name": "Agent",
+  "Site": "LITS",
+  "Type": "Monitor",
+  "Category": "Agent",
+  "HomeDir": "{{qb_dir}}",
+  "LogDir": "{{log_dir}}",
+  "LogDatePattern": "'.'MM",
+  "MailHost": "{{mail_host}}",
+  "StatsURL": "{{stats_url}}",
+  "CompletedFile": "{{log_dir}}/completed",
+  "Heartbeat": "300",
+  "MaxNumberThread": "3",
+  "MaxRetry": "3",
+  "Timeout": "600",
+  "Debug": "53",
+  "ConfigRepository": "repository_agent",
+  "OpenSSLPlugin": "org.qbroker.security.Decryptor",
+  "AdminServer": {
+    "ClassName": "org.qbroker.receiver.ServerReceiver",
+    "URI": "tcp://localhost:{{admin_port}}",
+    "Operation": "respond",
+    "Capacity": "64",
+    "Partition": "0,32",
+    "EOTBytes": "0x0a",
+    "TextMode": "1",
+    "Template": "##body##\n",
+    "Parser": {
+      "ClassName": "org.qbroker.event.EventParser"
+    },
+    "RestartScript": "/bin/bash -c \"{{qb_dir}}/bin/agentctl restart &\""
+  },
+  "MonitorGroup": [
+    {
+      "Name": "default",
+      "Monitor": [
+        "rpt_global_var"
+      ]
+    }
+  ],
+  "MessageFlow": [
+    {
+      "Name": "default",
+      "Description": "dispatch events for Agent",
+      "Capacity": "1024",
+      "XAMode": "0",
+      "Debug": "5",
+      "PauseTime": "2",
+      "StandbyTime": "60",
+      "Node": [
+        "node_format"
+      ],
+      "Persister": [
+        "pstr_event",
+        "pstr_nohit"
+      ]
+    },
+    {
+      "Name": "service",
+      "Description": "common services",
+      "Capacity": "128",
+      "XAMode": "0",
+      "Debug": "5",
+      "PauseTime": "2",
+      "StandbyTime": "60",
+      "DefaultStatus": "1",
+      "Receiver": [
+        "rcvr_listener"
+      ],
+      "Node": [
+        "node_service"
+      ],
+      "Persister": [
+        "pstr_pool_in",
+        "pstr_pool_out",
+        "pstr_null"
+      ]
+    }
+  ],
+  "rpt_global_var": {
+    "Name": "rpt_global_var",
+    "ClassName": "org.qbroker.monitor.StaticReport",
+    "Site": "LITS",
+    "Type": "StaticReport",
+    "Category": "STATIC",
+    "Description": "define a set of globals for message flows",
+    "Step": "1",
+    "ReportName": "GlobalProperties",
+    "ReportClass": "org.qbroker.flow.QFlow",
+    "StringProperty": {
+      "hostname": "##hostname##",
+      "HOSTNAME": "##HOSTNAME##",
+      "Repos_URL": "{{repo_url}}",
+      "Template": "${hostname} ${HOSTNAME} ${Repos_URL}"
+    }
+  },
+  "repository_agent": {
+    "Name": "repository_agent",
+    "ClassName": "org.qbroker.monitor.PropertyMonitor",
+    "Site": "LITS",
+    "Type": "PropertyMonitor",
+    "Category": "WDAP",
+    "Description": "Web JSON Configuration Repository",
+    "Step": "1",
+    "Tolerance": "1",
+    "MaxRetry": "2",
+    "MaxPage": "2",
+    "QuietPeriod": "12",
+    "ExceptionTolerance": "2",
+    "URI": "{{cfg_url}}/{{cfg_service}}/agent.json",
+    "Username": "{{cfg_user}}",
+    "EncryptedPassword": "{{encrypted_passwd}}",
+    "MaxBytes": "0",
+    "Pattern": "Last-[mM]odified: (\\w+, \\d+ \\w+ \\d+ \\d+:\\d+:\\d+\\.\\d+ \\w+)",
+    "DateFormat": "EE, dd MMM yyyy HH:mm:ss.SSS zz",
+    "Timeout": "60",
+    "IgnoredField": [
+      "LastModified"
+    ],
+    "Basename": "Agent",
+    "IncludeGroup": {
+      "ConfigRepository": "",
+      "MonitorGroup": [
+        "Monitor"
+      ],
+      "MessageFlow": [
+        "Receiver",
+        "Node",
+        "Persister"
+      ]
+    },
+    "PropertyFile": "{{qb_dir}}/agent/Agent.json",
+    "DependencyGroup": [
+      {
+        "Dependency": [
+          {
+            "Name": "repo_agent",
+            "ClassName": "org.qbroker.monitor.URLMonitor",
+            "URI": "{{cfg_url}}/{{cfg_service}}/agent.json",
+            "Operation": "HEAD",
+            "Username": "{{cfg_user}}",
+            "EncryptedPassword": "{{encrypted_passwd}}",
+            "MaxBytes": "0",
+            "Pattern": "Last-[mM]odified: (\\w+, \\d+ \\w+ \\d+ \\d+:\\d+:\\d+ \\w+)",
+            "DateFormat": "EE, dd MMM yyyy HH:mm:ss zz",
+            "Timeout": "60",
+            "TimeOffset": "0",
+            "Debug": "1"
+          }
+        ]
+      }
+    ],
+    "ActiveTime": {
+      "TimeWindow": [
+        {
+          "Interval": "00:00:00-24:00:00"
+        }
+      ]
+    }
+  },
+  "node_format": {
+    "Name": "node_format",
+    "ClassName": "org.qbroker.node.FormatNode",
+    "Description": "format event",
+    "Operation": "format",
+    "LinkName": "root",
+    "Capacity": "1024",
+    "DisplayMask": "0",
+    "Debug": "1",
+    "Ruleset": [
+      {
+        "Name": "event",
+        "ClassName": "org.qbroker.jms.Msg2Text",
+        "FormatterArgument": {
+          "Template": "",
+          "ResultType": "64"
+        }
+      }
+    ],
+    "OutLink": [
+      "web",
+      "nohit",
+      "nohit"
+    ]
+  },
+  "pstr_event": {
+    "Name": "pstr_event",
+    "ClassName": "org.qbroker.persister.FilePersister",
+    "URI": "{{event_url}}",
+    "LinkName": "web",
+    "Operation": "store",
+    "XAMode": "0",
+    "TextMode": "1",
+    "DisplayMask": "6",
+    "StringProperty": {
+      "name": "",
+      "priority": ""
+    }
+  },
+  "pstr_nohit": {
+    "Name": "pstr_nohit",
+    "ClassName": "org.qbroker.persister.LogPersister",
+    "URI": "log:///dev/null",
+    "Operation": "append",
+    "LinkName": "nohit",
+    "Template": "##site##\n",
+    "DisplayMask": "6"
+  },
+  "rcvr_listener": {
+    "Name": "rcvr_listener",
+    "ClassName": "org.qbroker.receiver.ServerListener",
+    "URI": "tcp://localhost:{{service_port}}",
+    "LinkName": "root",
+    "Operation": "accept",
+    "Partition": "0,0",
+    "Mode": "daemon",
+    "ReceiveTime": "30000",
+    "XAMode": "1",
+    "TextMode": "1",
+    "EOTBytes": "0x0a",
+    "DisplayMask": "0"
+  },
+  "node_service": {
+    "Name": "node_service",
+    "ClassName": "org.qbroker.node.ServiceNode",
+    "LinkName": "root",
+    "Operation": "proxy",
+    "Description": "for services",
+    "Capacity": "128",
+    "MaxNumberConnection": "128",
+    "SessionTimeout": "120",
+    "DisplayMask": "0",
+    "XAMode": "1",
+    "Debug": "1",
+    "Ruleset": [
+      {
+        "Name": "log",
+        "PreferredOutLink": "producer",
+        "JMSPropertyGroup": [
+          {
+            "uri": "^.*$"
+          }
+        ],
+        "Operation": "publish",
+        "Capacity": "32",
+        "XAMode": "0",
+        "MaxPublisher": "8",
+        "MaxIdleTime": "900",
+        "URITemplate": "##uri##"
+      },
+      {
+        "Name": "mq_put",
+        "PreferredOutLink": "consumer",
+        "JMSPropertyGroup": [
+          {
+            "HostName": "^.*$",
+            "QueueName": "^.*$"
+          }
+        ],
+        "Operation": "acquire",
+        "Capacity": "32",
+        "XAMode": "1",
+        "MaxIdleTime": "900",
+        "URITemplate": "wmq://##HostName##"
+      }
+    ],
+    "OutLink": [
+      "producer",
+      "consumer",
+      "null"
+    ]
+  },
+  "pstr_pool_in": {
+    "Name": "pstr_pool_in",
+    "ClassName": "org.qbroker.persister.ReceiverPool",
+    "LinkName": "producer",
+    "Operation": "accept",
+    "XAMode": "1",
+    "DefaultPoolSize": "32",
+    "MaxNumberReceiver": "512",
+    "Capacity": "128",
+    "Heartbeat": "60",
+    "DisplayMask": "7",
+    "StringProperty": {
+      "URI": "producer"
+    },
+    "DefaultProperty": [
+      {
+        "ClassName": "org.qbroker.receiver.StreamReceiver",
+        "URI": "tcp://localhost:7225",
+        "Operation": "read",
+        "Mode": "daemon",
+        "PoolSize": "128",
+        "KeepAlive": "true",
+        "SOTimeout": "60",
+        "EOTBytes": "0x0a",
+        "TextMode": "1",
+        "ReceiveTime": "1000",
+        "RetryTimeout": "300",
+        "PauseTime": "5000",
+        "StandbyTime": "12000",
+        "DisplayMask": "0"
+      },
+      {
+        "ClassName": "org.qbroker.receiver.LogReceiver",
+        "URI": "log:///var/log/qbroker/MonitorAgent.log",
+        "Operation": "fetch",
+        "Mode": "daemon",
+        "Heartbeat": "1",
+        "ReceiveTime": "1000",
+        "InitDelay": "10",
+        "LogSize": "50",
+        "PoolSize": "32",
+        "MaxNumberLogs": "1024",
+        "MaxNumberMessage": "0",
+        "TimePattern": "yyyy-MM-dd HH:mm:ss,SSS",
+        "SaveReference": "false",
+        "ReferenceFile": "/var/log/qbroker/.status/fetch.log",
+        "PatternGroup": [
+          {
+            "Pattern": [
+              "."
+            ]
+          }
+        ],
+        "XMode": "0",
+        "TextMode": "1",
+        "DisplayMask": "0"
+      },
+      {
+        "ClassName": "org.qbroker.receiver.JMSReceiver",
+        "URI": "wmq://localhost",
+        "Operation": "get",
+        "QueueName": "YLU",
+        "Mode": "daemon",
+        "PoolSize": "128",
+        "MaxIdleTime": "900",
+        "DisplayMask": "0"
+      },
+      {
+        "ClassName": "org.qbroker.receiver.JMSSubscriber",
+        "URI": "wmq://localhost",
+        "Operation": "sub",
+        "TopicName": "YLU",
+        "Mode": "daemon",
+        "PoolSize": "128",
+        "MaxIdleTime": "600",
+        "DisplayMask": "0"
+      }
+    ]
+  },
+  "pstr_pool_out": {
+    "Name": "pstr_pool_out",
+    "ClassName": "org.qbroker.persister.PersisterPool",
+    "LinkName": "consumer",
+    "Operation": "accept",
+    "Capacity": "64",
+    "XAMode": "1",
+    "DefaultPoolSize": "32",
+    "MaxNumberPersister": "512",
+    "Heartbeat": "60",
+    "DisplayMask": "7",
+    "StringProperty": {
+      "URI": "consumer"
+    },
+    "DefaultProperty": [
+      {
+        "ClassName": "org.qbroker.persister.StreamPersister",
+        "URI": "tcp://localhost:7227",
+        "Operation": "request",
+        "PoolSize": "256",
+        "TextMode": "1",
+        "EOTBytes": "0x0a",
+        "Template": "##body## ~ ReturnCode ~ ##ReturnCode##\n",
+        "KeepAlive": "true",
+        "SOTimeout": "60",
+        "ReceiveTime": "1000",
+        "RetryTimeout": "300",
+        "PauseTime": "1000",
+        "StandbyTime": "5000",
+        "MaxIdleTime": "900",
+        "DisplayMask": "0",
+        "Parser": {
+          "ClassName": "org.qbroker.event.EventParser"
+        }
+      },
+      {
+        "ClassName": "org.qbroker.persister.JMSPersister",
+        "URI": "wmq://localhost",
+        "Operation": "query",
+        "QueueName": "YLU",
+        "PoolSize": "256",
+        "MaxNumberMessage": "512",
+        "ResultType": "8",
+        "BaseTag": "Record",
+        "MaxIdleTime": "600",
+        "DisplayMask": "6",
+        "StringProperty": {
+          "MsgCount": "",
+          "MSQL": "",
+          "uri": ""
+        }
+      },
+      {
+        "ClassName": "org.qbroker.persister.JMSPublisher",
+        "URI": "wmq://localhost",
+        "Operation": "pub",
+        "TopicName": "YLU",
+        "PoolSize": "128",
+        "MaxIdleTime": "900",
+        "DisplayMask": "0"
+      },
+      {
+        "ClassName": "org.qbroker.persister.FilePersister",
+        "URI": "http://localhost:8080/",
+        "Operation": "download",
+        "PoolSize": "256",
+        "SOTimeout": "60",
+        "TextMode": "1",
+        "Retry": "1",
+        "MaxIdleTime": "900",
+        "DisplayMask": "0"
+      },
+      {
+        "ClassName": "org.qbroker.persister.JDBCPersister",
+        "URI": "jdbc:mysql://localhost:3306/omdb",
+        "Operation": "query",
+        "Username": "omdba",
+        "Password": "xxxx",
+        "PoolSize": "256",
+        "SQLField": "JDBC",
+        "ResultType": "8",
+        "MaxIdleTime": "900",
+        "DisplayMask": "6"
+      },
+      {
+        "ClassName": "org.qbroker.persister.JMXPersister",
+        "URI": "pcf://localhost",
+        "Operation": "display",
+        "PoolSize": "256",
+        "MaxNumberMessage": "512",
+        "BaseTag": "Record",
+        "ResultType": "8",
+        "MaxIdleTime": "600",
+        "DisplayMask": "6",
+        "StringProperty": {
+          "MsgCount": "",
+          "PCF": "",
+          "uri": ""
+        }
+      },
+      {
+        "ClassName": "org.qbroker.persister.DocumentPersister",
+        "URI": "mongodb://localhost",
+        "Operation": "find",
+        "PoolSize": "64",
+        "MaxNumberMessage": "512",
+        "BaseTag": "Record",
+        "ResultType": "8",
+        "MaxIdleTime": "600",
+        "DisplayMask": "6",
+        "StringProperty": {
+          "Collection": "",
+          "DBName": "",
+          "uri": ""
+        }
+      },
+      {
+        "ClassName": "org.qbroker.persister.RedisPersister",
+        "URI": "redis://localhost",
+        "Operation": "find",
+        "PoolSize": "64",
+        "MaxNumberMessage": "512",
+        "ResultType": "8",
+        "MaxIdleTime": "240",
+        "DisplayMask": "6",
+        "StringProperty": {
+          "uri": ""
+        }
+      }
+    ]
+  },
+  "pstr_null": {
+    "Name": "pstr_null",
+    "ClassName": "org.qbroker.persister.LogPersister",
+    "URI": "log:///dev/null",
+    "Operation": "append",
+    "LinkName": "null",
+    "Template": "##site##\n",
+    "DisplayMask": "6"
+  }
+}

@@ -1,0 +1,10 @@
+This message was automatically generated.
+Process of ##name## died on ##hostname##:
+
+##compact##
+
+This monitor checks Unix process table for a predifined patters periodically.  If this is the first occurrence of this error, please connect to ##hostname##, and then restart the process.
+
+If it persists, please contact the on call.
+
+A brief explanation on the monitor and this type of message can be found at https://intevent.cc.emory.edu/docs/application/agent.html###type##.
