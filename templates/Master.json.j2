@@ -1,6 +1,6 @@
 {
   "Name": "Agent",
-  "Site": "LITS",
+  "Site": "DEVOPS",
   "Type": "Monitor",
   "Category": "Agent",
   "HomeDir": "{{qb_dir}}",
@@ -17,17 +17,15 @@
   "ConfigRepository": "repository_agent",
   "OpenSSLPlugin": "org.qbroker.security.Decryptor",
   "AdminServer": {
-    "ClassName": "org.qbroker.receiver.ServerReceiver",
-    "URI": "tcp://localhost:{{admin_port}}",
-    "Operation": "respond",
+    "Name": "admin",
+    "ClassName": "org.qbroker.net.SimpleHttpServer",
+    "URI": "https://localhost:{{admin_port}}/admin/jms",
+    "Operation": "handle",
     "Capacity": "64",
     "Partition": "0,32",
-    "EOTBytes": "0x0a",
-    "TextMode": "1",
-    "Template": "##body##\n",
-    "Parser": {
-      "ClassName": "org.qbroker.event.EventParser"
-    },
+    "Timeout": "10",
+    "KeyStoreFile": "{{qb_dir}}/cfg/server.jks",
+    "EncryptedKeyStorePassword": "{{encrypted_ks_passwd}}",
     "RestartScript": "/bin/bash -c \"{{qb_dir}}/bin/agentctl restart &\""
   },
   "MonitorGroup": [
@@ -80,7 +78,7 @@
   "rpt_global_var": {
     "Name": "rpt_global_var",
     "ClassName": "org.qbroker.monitor.StaticReport",
-    "Site": "LITS",
+    "Site": "DEVOPS",
     "Type": "StaticReport",
     "Category": "STATIC",
     "Description": "define a set of globals for message flows",
@@ -97,7 +95,7 @@
   "repository_agent": {
     "Name": "repository_agent",
     "ClassName": "org.qbroker.monitor.PropertyMonitor",
-    "Site": "LITS",
+    "Site": "DEVOPS",
     "Type": "PropertyMonitor",
     "Category": "WDAP",
     "Description": "Web JSON Configuration Repository",

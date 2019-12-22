@@ -10,6 +10,7 @@ MonitorAgent_cfg_service: localhost
 MonitorAgent_cfg_user: omadm
 MonitorAgent_encrypted_passwd: xxxx
 MonitorAgent_admin_port: 6627
+MonitorAgent_encrypted_ks_passwd: xxxx
 MonitorAgent_service_port: 6625
 MonitorAgent_logdir: /var/log/qbroker
 MonitorAgent_cpu_pct: 35
@@ -17,9 +18,9 @@ MonitorAgent_mem_pct: 35
 
 MonitorAgent_jar_files:
   - activation-1.1.jar
-  - commons-fileupload-1.3.3.jar
   - commons-io-1.4.jar
   - commons-net-3.3.jar
+  - http-20070405.jar
   - jakarta-oro-2.0.8.jar
   - jms-1.1.jar
   - log4j-1.2.12.jar

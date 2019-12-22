@@ -19,4 +19,11 @@
 - include: roles/qbroker/tasks/remove_item.yml
   vars:
     my_dir: "{{qbroker_dir}}/agent"
-  with_items: "{{my_file}}"
+  with_items: "{{my_files}}"
+
+- include: roles/qbroker/tasks/remove_item.yml
+  vars:
+    my_dir: "/var/cache/ansible"
+  with_items:
+    - "{{MonitorAgent_artifact}}"
+    - "{{MonitorAgent_security_plugin}}"

@@ -45,6 +45,7 @@
     stats_url: "{{MonitorAgent_stats_url}}"
     mail_host: "{{MonitorAgent_mail_host}}"
     admin_port: "{{MonitorAgent_admin_port}}"
+    encrypted_ks_passwd: "{{MonitorAgent_encrypted_ks_passwd}}"
     service_port: "{{MonitorAgent_service_port}}"
     cfg_url: "{{MonitorAgent_cfg_url}}"
     cfg_service: "{{MonitorAgent_cfg_service}}"
