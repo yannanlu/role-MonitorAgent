@@ -1,5 +1,5 @@
 ---
-MonitorAgent_artifact: qbroker-1.2.4.jar
+MonitorAgent_artifact: qbroker-1.2.5.jar
 MonitorAgent_security_plugin: qbroker-security-1.0.0.jar
 MonitorAgent_mail_host: localhost
 MonitorAgent_event_url: http://localhost:8082/event
@@ -8,9 +8,9 @@ MonitorAgent_stats_url: http://localhost:8082/stats
 MonitorAgent_cfg_url: http://localhost:8082/agent
 MonitorAgent_cfg_service: localhost
 MonitorAgent_cfg_user: omadm
-MonitorAgent_encrypted_passwd: xxxx
+MonitorAgent_encrypted_passwd: xTiJ6jyB0Sad0y7Bg8ym4Z6Cw/ATu8lFoY3Ui7KsHu5=
 MonitorAgent_admin_port: 6627
-MonitorAgent_encrypted_ks_passwd: xxxx
+MonitorAgent_encrypted_ks_passwd: Go3eP4HWJnxPnIdotenT3+yunLFn/uF+Y5ZaEb2W+7C=
 MonitorAgent_service_port: 6625
 MonitorAgent_logdir: /var/log/qbroker
 MonitorAgent_cpu_pct: 35

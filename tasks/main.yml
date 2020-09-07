@@ -12,6 +12,8 @@
     destination_port: "{{MonitorAgent_admin_port}}"
     action: insert
     jump: ACCEPT
+    match: state
+    ctstate: NEW
     protocol: tcp
     state: present
   register: port_admin_result
@@ -23,13 +25,15 @@
     destination_port: "{{MonitorAgent_service_port}}"
     action: insert
     jump: ACCEPT
+    match: state
+    ctstate: NEW
     protocol: tcp
     state: present
   register: port_service_result
   when: MonitorAgent_service_port > 0 and common_iptables != 'disabled'
 
 - name: Save iptables
-  command: "/sbin/iptables-save"
+  shell: "/sbin/iptables-save > /etc/sysconfig/iptables"
   when: port_service_result is changed or port_admin_result is changed
 
 - name: Template of Master.json
